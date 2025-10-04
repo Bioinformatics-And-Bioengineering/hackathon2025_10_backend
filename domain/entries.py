@@ -20,13 +20,22 @@ def create_entry(user_id: int, date: str, category: str, amount: int, memo: str)
     # TODO(後で): type="income|expense" を受け取り、expense なら amount を負に
     ensure_csv(ENTRIES_CSV, ENTRIES_HEADERS)
     nid = next_id(ENTRIES_CSV)
+
+    # 🔹 符号付け処理を追加
+    if type == "expense":
+        signed_amount = -abs(amount)
+    elif type == "income":
+        signed_amount = abs(amount)
+    else:
+        raise ValueError(f"Invalid type: {type}")
+    
     row = {
         "id": str(nid),
         "user_id": str(user_id),
         "date": date,
         "category": category,
-        "amount": str(amount),
+        "amount": str(signed_amount),
         "memo": memo
     }
     append_row(ENTRIES_CSV, row, ENTRIES_HEADERS)
-    return {**row, "id": nid, "user_id": user_id, "amount": amount}
+    return {**row, "id": nid, "user_id": user_id, "amount": signed_amount}
