@@ -2,28 +2,44 @@ name: deploy-backend-to-ec2
 
 on:
   pull_request:
-    types: [closed]        # PRが閉じられた時に発火（クローズ or マージ）
-    branches: ["main"]     # 対象は main に向いたPRだけ
+    types: [closed]
+    branches: ["main"]
 
 jobs:
   deploy:
-    if: github.event.pull_request.merged == true      # マージされたときだけ実行（Closeは無視）
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     concurrency:
-      group: backend-deploy-main                      # 並列デプロイ防止（最新だけ動く）
+      group: backend-deploy-main
       cancel-in-progress: true
 
     steps:
-      # マージ後の main を取得（base.ref は通常 "main"）
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.base.ref }}
           fetch-depth: 0
 
+      # 送る前提: アーカイブが存在するか確認
       - name: Archive source (git archive)
         run: git archive --format=tar.gz -o backend.tar.gz HEAD
 
-      - name: Copy source to EC2
+      - name: Show archive info
+        run: ls -lah backend.tar.gz
+
+      # 事前にターゲットディレクトリを作成 & 権限付与
+      - name: Prepare target dir on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST_BACK }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            sudo mkdir -p /opt/backend
+            sudo chown -R ${USER}:${USER} /opt/backend
+
+      # アップロード（デバッグON）
+      - name: Copy source to EC2 (scp)
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST_BACK }}
@@ -31,7 +47,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "backend.tar.gz"
           target: "/opt/backend/"
+          debug: true
 
+      # 展開～再起動
       - name: SSH install & restart (CSV storage)
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -43,6 +61,7 @@ jobs:
             cd /opt/backend
             mkdir -p data
             tar xzf backend.tar.gz --strip-components=1
+            rm -f backend.tar.gz
             python3 -m venv .venv || true
             source .venv/bin/activate
             pip install --upgrade pip
