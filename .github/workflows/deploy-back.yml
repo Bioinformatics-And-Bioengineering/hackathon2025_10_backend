@@ -21,8 +21,11 @@ jobs:
           fetch-depth: 0
 
       - name: Archive source
-        run: tar czf backend.tar.gz --exclude='.git' .
-
+        run: tar czf backend.tar.gz \
+             --exclude='.git' \
+             --exclude='backend.tar.gz' \
+             .
+             
       - name: Copy source to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
