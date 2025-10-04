@@ -20,12 +20,10 @@ jobs:
           ref: ${{ github.event.pull_request.base.ref }}
           fetch-depth: 0
 
-      - name: Archive source
-        run: tar czf backend.tar.gz \
-             --exclude='.git' \
-             --exclude='backend.tar.gz' \
-             .
-             
+      - name: Archive source (git archive)
+        run: git archive --format=tar.gz -o backend.tar.gz HEAD
+
+
       - name: Copy source to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
