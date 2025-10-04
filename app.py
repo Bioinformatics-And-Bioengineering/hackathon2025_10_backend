@@ -11,7 +11,7 @@ CORS(app, origins=os.getenv("CORS_ORIGINS", "*").split(","))
 
 @app.get("/healthz")
 def healthz():
-    return {"日付": 20251004}, 200
+    return {"日付": 2025}, 200
 
 @app.get("/healthz2")
 def healthz2():
