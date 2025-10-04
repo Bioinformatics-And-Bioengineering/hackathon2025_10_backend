@@ -4,3 +4,5 @@ id,user_id,date,category,amount,memo
 3,1,2025-10-03,groceries,3200,supermarket
 4,1,2025-10-04,food,800,udon
 5,1,2025-09-28,entertainment,1500,movie
+6,1,2025-10-05,食費,-5000,
+7,1,2025-10-05,給与,1000,

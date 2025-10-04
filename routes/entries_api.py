@@ -6,6 +6,9 @@ from domain.character import apply_entry_and_update
 
 entries_bp = Blueprint("entries_bp", __name__)
 
+valid_month = lambda m: bool(re.fullmatch(r"\d{4}-\d{2}", m))
+valid_date  = lambda d: bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", d))
+
 @entries_bp.get("/entries")
 def get_entries():
     month = request.args.get("month")
@@ -30,16 +33,16 @@ def post_entry():
             return {"error": "invalid type (income|expense)", "field": "type"}, 400
         if amount_raw <= 0:
             return {"error": "amount must be positive integer", "field": "amount"}, 400
-        if not (valid_date(date) and category and amount >= 0):
+        if not (valid_date(date) and category and amount_raw >= 0):
             return {"error": "invalid payload"}, 400
 
         entry = create_entry(
             user_id=user_id,
             date=date,
             category=category,
-            amount_raw=amount_raw,
+            amount=amount_raw,
             memo=memo,
-            tx_type=tx_type,
+            type=tx_type,
         )
 
         ch, gained, leveled = apply_entry_and_update(user_id, date)
