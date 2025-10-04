@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from csv_store import read_entries, append_entry
 
-# Render ‚Å‚ÍƒfƒBƒXƒN‚ğ /var/data ‚Éƒ}ƒEƒ“ƒg‚·‚é‘z’èirender.yaml‚Åİ’èj
+# Render ã§ã¯ãƒ‡ã‚£ã‚¹ã‚¯ã‚’ /var/data ã«ãƒã‚¦ãƒ³ãƒˆã™ã‚‹æƒ³å®šï¼ˆrender.yamlã§è¨­å®šï¼‰
 CSV_PATH = os.getenv("CSV_PATH", "/var/data/entries.csv")
 
 app = Flask(__name__)
