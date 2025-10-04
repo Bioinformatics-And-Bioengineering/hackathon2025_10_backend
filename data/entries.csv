@@ -1,0 +1,6 @@
+id,user_id,date,category,amount,memo
+1,1,2025-10-01,food,1200,lunch
+2,1,2025-10-02,transport,240,bus
+3,1,2025-10-03,groceries,3200,supermarket
+4,1,2025-10-04,food,800,udon
+5,1,2025-09-28,entertainment,1500,movie

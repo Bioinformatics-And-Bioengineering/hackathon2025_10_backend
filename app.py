@@ -1,39 +1,31 @@
-import os
-from flask import Flask, request, jsonify
+# app.py
+from flask import Flask
 from flask_cors import CORS
-from csv_store import read_entries, append_entry
+import os
 
-# Render ではディスクを /var/data にマウントする想定（render.yamlで設定）
-CSV_PATH = os.getenv("CSV_PATH", "/var/data/entries.csv")
+from routes.entries_api import entries_bp
+from routes.goals_api import goals_bp
+from routes.misc_api import misc_bp
+from routes.image_api import image_bp
+from routes.state_api import state_bp
 
-app = Flask(__name__)
-CORS(app, origins=os.getenv("CORS_ORIGINS", "*").split(","))
+def create_app():
+    app = Flask(__name__)
+    app.json.ensure_ascii = False
+    CORS(app, origins=os.getenv("CORS_ORIGINS", "*").split(","))
 
-@app.get("/healthz")
-def healthz():
-    return {"日付": 2025}, 200
+    app.register_blueprint(entries_bp, url_prefix="/api")
+    app.register_blueprint(goals_bp,   url_prefix="/api")
+    app.register_blueprint(misc_bp,    url_prefix="/api")
+    app.register_blueprint(image_bp,   url_prefix="/api")
+    app.register_blueprint(state_bp,   url_prefix="/api")
 
-@app.get("/healthz2")
-def healthz2():
-    return {"日付": 20251004}, 200
+    @app.get("/healthz")
+    def healthz():
+        return {"ok": True}, 200
 
-@app.get("/entries")
-def list_entries():
-    rows = read_entries(CSV_PATH, limit=100)
-    return jsonify(rows), 200
-
-@app.post("/entries")
-def create_entry():
-    data = request.get_json(silent=True) or {}
-    name = (data.get("name") or "").strip()
-    content = (data.get("content") or "").strip()
-    if not name or not content:
-        return {"error": "name and content are required"}, 400
-    user_ip = request.headers.get("X-Forwarded-For", request.remote_addr)
-    new_id = append_entry(CSV_PATH, name=name, content=content, ip=user_ip)
-    return {"id": new_id}, 201
+    return app
 
 if __name__ == "__main__":
-    import os
-    port = int(os.getenv("PORT", "5000"))  # ← Render が割り当てるポートを使用
-    app.run(host="0.0.0.0", port=port)     # 本番では debug=False 推奨
+    app = create_app()
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT","5000")))
