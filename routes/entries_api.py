@@ -21,25 +21,45 @@ def get_entries():
 def post_entry():
     b = request.get_json(silent=True) or {}
     try:
-        user_id = int(b.get("user_id", 1))
-        date    = (b.get("date") or "").strip()
-        category= (b.get("category") or "").strip()
-        amount  = int(b.get("amount", -1))  # デモ中は正の値で受ける
-        memo    = (b.get("memo") or "").strip()
+        user_id    = int(b.get("user_id", 1))
+        date       = (b.get("date") or "").strip()
+        category   = (b.get("category") or "").strip()
+        memo       = (b.get("memo") or "").strip()
+        tx_type    = (b.get("type") or "expense").lower()
+        # amount は「正の整数」で受ける（正負は domain 側で決定）
+        amount_raw = int(b.get("amount", -1))
 
+        if tx_type not in ("income", "expense"):
+            return {"error": "invalid type (income|expense)", "field": "type"}, 400
+        if amount_raw <= 0:
+            return {"error": "amount must be positive integer", "field": "amount"}, 400
         if not (valid_date(date) and category and amount >= 0):
             return {"error": "invalid payload"}, 400
 
-        entry = create_entry(user_id, date, category, amount, memo)
+        entry = create_entry(
+            user_id=user_id,
+            date=date,
+            category=category,
+            amount_raw=amount_raw,
+            memo=memo,
+            tx_type=tx_type,
+        )
+
         ch, gained, leveled = apply_entry_and_update(user_id, date)
 
         return jsonify({
             "entry": entry,
             "character": {
-                "level": ch["level"], "exp": ch["exp"],
-                "expGained": gained, "streak": ch["streak"],
-                "leveledUp": leveled
-            }
+                "level": ch["level"],
+                "exp": ch["exp"],
+                "expGained": gained,
+                "streak": ch["streak"],
+                "leveledUp": leveled,
+            },
         }), 201
+    
+    except ValueError as ve:
+        # 例: int変換失敗や domain 側の ValueError
+        return {"error": str(ve)}, 400
     except Exception as e:
         return {"error": str(e)}, 500
