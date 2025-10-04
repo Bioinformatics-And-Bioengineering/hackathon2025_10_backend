@@ -13,6 +13,10 @@ CORS(app, origins=os.getenv("CORS_ORIGINS", "*").split(","))
 def healthz():
     return {"日付": 20251004}, 200
 
+@app.get("/healthz2")
+def healthz2():
+    return {"日付": 20251004}, 200
+
 @app.get("/entries")
 def list_entries():
     rows = read_entries(CSV_PATH, limit=100)
