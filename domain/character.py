@@ -47,7 +47,7 @@ def save(obj: Dict) -> None:
 
 def apply_entry_and_update(user_id: int, date_str: str) -> Tuple[Dict, int, bool]:
     st = load_or_init(user_id)
-    gained = 5  # TODO(後で): config化
+    gained = 500  # TODO(後で): config化
     leveled = False
 
     if st["last_input_date"]:
