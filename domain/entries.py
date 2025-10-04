@@ -16,7 +16,7 @@ def list_by_month(user_id: int, month: str) -> List[Dict]:
     rows.sort(key=lambda x: x["date"])
     return rows
 
-def create_entry(user_id: int, date: str, category: str, amount: int, memo: str) -> Dict:
+def create_entry(user_id: int, date: str, category: str, amount: int, memo: str, type: str) -> Dict:
     # TODO(後で): type="income|expense" を受け取り、expense なら amount を負に
     ensure_csv(ENTRIES_CSV, ENTRIES_HEADERS)
     nid = next_id(ENTRIES_CSV)

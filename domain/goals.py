@@ -24,13 +24,22 @@ def set_goal(user_id: int, month: str, goal: int) -> None:
         rows.append({"user_id": str(user_id), "month": month, "goal_amount": str(goal)})
     atomic_replace(GOALS_CSV, rows, GOALS_HEADERS)
 
-def sum_month_total(user_id: int, month: str) -> int:
+def sum_month_total(user_id: int, month: str):
     ensure_csv(ENTRIES_CSV, ENTRIES_HEADERS)
-    total = 0
+    income_sum = 0
+    expense_sum = 0
+
     for r in read_all(ENTRIES_CSV):
         if int(r.get("user_id", "1")) == user_id and r.get("date", "").startswith(month):
             try:
-                total += int(r.get("amount", "0"))
+                amount = int(r.get("amount", "0"))
+                # amountが正のとき収入、負のとき支出として扱う
+                if amount >= 0:
+                    income_sum += amount
+                else:
+                    expense_sum += abs(amount)
             except:
                 pass
-    return total
+
+    total = income_sum - expense_sum
+    return {"total": total, "income_sum": income_sum, "expense_sum": expense_sum}
