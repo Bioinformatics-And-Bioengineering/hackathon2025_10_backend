@@ -3,7 +3,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from csv_store import read_entries, append_entry
 
-CSV_PATH = os.getenv("CSV_PATH", "/opt/backend/data/entries.csv")
+# Render ではディスクを /var/data にマウントする想定（render.yamlで設定）
+CSV_PATH = os.getenv("CSV_PATH", "/var/data/entries.csv")
 
 app = Flask(__name__)
 CORS(app, origins=os.getenv("CORS_ORIGINS", "*").split(","))
