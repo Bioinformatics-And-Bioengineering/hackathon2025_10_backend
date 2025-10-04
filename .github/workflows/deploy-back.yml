@@ -1,0 +1,51 @@
+name: deploy-backend-to-ec2
+
+on:
+  pull_request:
+    types: [closed]        # PRが閉じられた時に発火（クローズ or マージ）
+    branches: ["main"]     # 対象は main に向いたPRだけ
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true      # マージされたときだけ実行（Closeは無視）
+    runs-on: ubuntu-latest
+    concurrency:
+      group: backend-deploy-main                      # 並列デプロイ防止（最新だけ動く）
+      cancel-in-progress: true
+
+    steps:
+      # マージ後の main を取得（base.ref は通常 "main"）
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          fetch-depth: 0
+
+      - name: Archive source
+        run: tar czf backend.tar.gz --exclude='.git' .
+
+      - name: Copy source to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST_BACK }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "backend.tar.gz"
+          target: "/opt/backend/"
+
+      - name: SSH install & restart (CSV storage)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST_BACK }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/backend
+            mkdir -p data
+            tar xzf backend.tar.gz --strip-components=1
+            python3 -m venv .venv || true
+            source .venv/bin/activate
+            pip install --upgrade pip
+            pip install -r requirements.txt
+            sudo systemctl restart gunicorn
+            sudo nginx -t && sudo systemctl reload nginx || true
