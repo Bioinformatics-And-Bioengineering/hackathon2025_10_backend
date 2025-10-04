@@ -30,4 +30,6 @@ def create_entry():
     return {"id": new_id}, 201
 
 if __name__ == "__main__":
-    app.run()
+    import os
+    port = int(os.getenv("PORT", "5000"))  # ← Render が割り当てるポートを使用
+    app.run(host="0.0.0.0", port=port)     # 本番では debug=False 推奨
