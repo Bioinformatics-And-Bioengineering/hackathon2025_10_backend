@@ -3,17 +3,19 @@ services:
     name: hackathon-backend
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python3 app.py              # ← あなたの現設定に合わせる
-    healthCheckPath: /healthz
+    startCommand: python3 app.py
     autoDeploy: true
+
+    # 永続ディスク：/var/data にマウント
     disk:
       name: data
       mountPath: /var/data
       sizeGB: 1
+
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
-      - key: CSV_PATH
-        value: /var/data/entries.csv
-      - key: CORS_ORIGINS
+      - key: CSV_DIR           # 重要：ここに保存されるので永続
+        value: /var/data
+      - key: CORS_ORIGINS      # 今回はバックエンド単体検証なので "*" でOK
         value: "*"
