@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: hackathon-backend
+    env: python
+    plan: free           # 必要に応じて starter 等に変更
+    region: singapore    # 近いリージョンを選択（例: singapore / oregon / frankfurt）
+    autoDeploy: true
+
+    # ビルド＆起動
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 2 --threads 4 --timeout 60
+
+    # ヘルスチェック（RenderのHealth Check）
+    healthCheckPath: /healthz
+
+    # 永続ディスク（CSV保存用）
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+
+    # 環境変数（必要に応じてダッシュボード側で上書き可能）
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: CORS_ORIGINS
+        value: "*"               # 本番はフロントのURLに絞る: https://front.example.com
+      - key: CSV_PATH
+        value: /var/data/entries.csv
