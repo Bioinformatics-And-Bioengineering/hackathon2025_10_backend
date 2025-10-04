@@ -2,28 +2,28 @@ services:
   - type: web
     name: hackathon-backend
     env: python
-    plan: free           # •K—v‚É‰‚¶‚Ä starter “™‚É•ÏX
-    region: singapore    # ‹ß‚¢ƒŠ[ƒWƒ‡ƒ“‚ğ‘I‘ği—á: singapore / oregon / frankfurtj
+    plan: free           # å¿…è¦ã«å¿œã˜ã¦ starter ç­‰ã«å¤‰æ›´
+    region: singapore    # è¿‘ã„ãƒªãƒ¼ã‚¸ãƒ§ãƒ³ã‚’é¸æŠï¼ˆä¾‹: singapore / oregon / frankfurtï¼‰
     autoDeploy: true
 
-    # ƒrƒ‹ƒh•‹N“®
+    # ãƒ“ãƒ«ãƒ‰ï¼†èµ·å‹•
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app --workers 2 --threads 4 --timeout 60
 
-    # ƒwƒ‹ƒXƒ`ƒFƒbƒNiRender‚ÌHealth Checkj
+    # ãƒ˜ãƒ«ã‚¹ãƒã‚§ãƒƒã‚¯ï¼ˆRenderã®Health Checkï¼‰
     healthCheckPath: /healthz
 
-    # ‰i‘±ƒfƒBƒXƒNiCSV•Û‘¶—pj
+    # æ°¸ç¶šãƒ‡ã‚£ã‚¹ã‚¯ï¼ˆCSVä¿å­˜ç”¨ï¼‰
     disk:
       name: data
       mountPath: /var/data
       sizeGB: 1
 
-    # ŠÂ‹«•Ï”i•K—v‚É‰‚¶‚Äƒ_ƒbƒVƒ…ƒ{[ƒh‘¤‚Åã‘‚«‰Â”\j
+    # ç’°å¢ƒå¤‰æ•°ï¼ˆå¿…è¦ã«å¿œã˜ã¦ãƒ€ãƒƒã‚·ãƒ¥ãƒœãƒ¼ãƒ‰å´ã§ä¸Šæ›¸ãå¯èƒ½ï¼‰
     envVars:
       - key: PYTHON_VERSION
         value: 3.11
       - key: CORS_ORIGINS
-        value: "*"               # –{”Ô‚Íƒtƒƒ“ƒg‚ÌURL‚Éi‚é: https://front.example.com
+        value: "*"               # æœ¬ç•ªã¯ãƒ•ãƒ­ãƒ³ãƒˆã®URLã«çµã‚‹: https://front.example.com
       - key: CSV_PATH
         value: /var/data/entries.csv
