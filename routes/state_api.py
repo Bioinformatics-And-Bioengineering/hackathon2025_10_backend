@@ -1,5 +1,5 @@
 # routes/state_api.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, url_for
 import re
 from datetime import date
 import calendar as cal
@@ -38,6 +38,12 @@ def get_state():
     calendar = {"month": month, "days_in_month": dim,
                 "start_weekday_mon0": start_mon0, "start_weekday_sun0": start_sun0,
                 "days": days}
+    
+    # character を組み立てた後に：
+    filename = level_to_tier(character["level"])
+    image_url = url_for("static", filename=f"images/tiers/{filename}", _external=True)
+    character["image_url"] = image_url
+    character["image_tier_file"] = filename
 
     return jsonify({"character": character, "goals": goals,
                     "calendar": calendar, "entries": entries}), 200
